@@ -7,11 +7,8 @@ class RewardsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        leading: CupertinoNavigationBarBackButton(
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        middle: const Text("Rewards", style: TextStyle(color: Colors.black)),
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text("Rewards", style: TextStyle(color: Colors.black)),
       ),
       child: SafeArea(
         child: ListView(

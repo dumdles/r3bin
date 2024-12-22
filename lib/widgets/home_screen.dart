@@ -1,57 +1,97 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  User? _currentUser;
+  Map<String, dynamic>? _userData;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    _currentUser = _auth.currentUser;
+
+    if (_currentUser != null) {
+      final userDoc =
+          await _firestore.collection('users').doc(_currentUser!.uid).get();
+
+      if (userDoc.exists) {
+        setState(() {
+          _userData = userDoc.data();
+        });
+      } else {
+        print("User document does not exist");
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
+      navigationBar: CupertinoNavigationBar(
         middle: Text(
-          'Welcome, Riley!',
-          style: TextStyle(fontSize: 16, color: CupertinoColors.black),
+          _userData != null ? 'Welcome, ${_userData?['name']}!' : 'Welcome!',
+          style: const TextStyle(fontSize: 16, color: CupertinoColors.black),
         ),
       ),
       child: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: const [
-            AddressHeader(),
-            SizedBox(height: 20),
-            PointsCard(),
-            SizedBox(height: 20),
-            SectionHeader(title: 'Find your nearest Community Deposit Bin'),
-            SizedBox(height: 10),
-            InfoCard(),
-            SizedBox(height: 20),
-            SectionHeader(title: 'Latest rewards'),
-            SizedBox(height: 10),
-            RewardsList(),
-            SizedBox(height: 20),
-            SectionHeader(title: 'Recent transactions'),
-            TransactionList(),
-          ],
-        ),
+        child: _userData == null
+            ? const Center(child: CupertinoActivityIndicator())
+            : ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  AddressHeader(address: _userData?['address']),
+                  const SizedBox(height: 20),
+                  PointsCard(points: _userData?['rewardsEarned']),
+                  const SizedBox(height: 20),
+                  const SectionHeader(
+                      title: 'Find your nearest Community Deposit Bin'),
+                  const SizedBox(height: 10),
+                  const InfoCard(),
+                  const SizedBox(height: 20),
+                  const SectionHeader(title: 'Latest rewards'),
+                  const SizedBox(height: 10),
+                  const RewardsList(),
+                  const SizedBox(height: 20),
+                  const SectionHeader(title: 'Recent transactions'),
+                  const TransactionList(),
+                ],
+              ),
       ),
     );
   }
 }
 
 class AddressHeader extends StatelessWidget {
-  const AddressHeader({super.key});
+  final String? address;
+
+  const AddressHeader({Key? key, this.address}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return const Align(
+    return Align(
       alignment: Alignment.center,
       child: Row(
         children: [
-          Icon(CupertinoIcons.location_solid, size: 20),
-          SizedBox(width: 8),
+          const Icon(Icons.location_city_rounded, size: 20),
+          const SizedBox(width: 8),
           Text(
-            '#11-905, 945 Jurong West Street 91',
-            style: TextStyle(fontSize: 16, color: CupertinoColors.black),
+            address ?? 'No address available',
+            style: const TextStyle(fontSize: 16, color: CupertinoColors.black),
           ),
         ],
       ),
@@ -60,7 +100,9 @@ class AddressHeader extends StatelessWidget {
 }
 
 class PointsCard extends StatelessWidget {
-  const PointsCard({Key? key}) : super(key: key);
+  final dynamic points; // Accept dynamic type to handle both int and String
+
+  const PointsCard({Key? key, this.points}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -70,19 +112,21 @@ class PointsCard extends StatelessWidget {
         color: CupertinoColors.systemGreen,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Current Points',
+          const Text('Current Points',
               style: TextStyle(color: CupertinoColors.white)),
-          SizedBox(height: 8),
-          Text('233',
-              style: TextStyle(
-                  fontSize: 36,
-                  color: CupertinoColors.white,
-                  fontWeight: FontWeight.w900)),
-          SizedBox(height: 8),
-          Text('Keep it up! 20% up from November!',
+          const SizedBox(height: 8),
+          Text(
+            points?.toString() ?? '0', // Convert points to String safely
+            style: const TextStyle(
+                fontSize: 36,
+                color: CupertinoColors.white,
+                fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 8),
+          const Text('Keep it up! You\'re doing great!',
               style: TextStyle(color: CupertinoColors.white)),
         ],
       ),
