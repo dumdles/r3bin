@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "783197773625",
+    "project_id": "r3bin-44186",
+    "storage_bucket": "r3bin-44186.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:783197773625:android:bc1b3258d1a74d411152e8",
+        "android_client_info": {
+          "package_name": "com.example.r3bin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwxnFwzBxkMe2NTUpFQ-79kO8t7lkr2yE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:783197773625:android:2e5d5db9790a38bc1152e8",
+        "android_client_info": {
+          "package_name": "com.r3bin.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwxnFwzBxkMe2NTUpFQ-79kO8t7lkr2yE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
