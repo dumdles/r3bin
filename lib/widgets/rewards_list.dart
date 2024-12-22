@@ -14,7 +14,11 @@ class _RewardsListState extends State<RewardsList> {
 
   Future<List<Map<String, dynamic>>> _fetchRewards() async {
     final rewardsSnapshot = await _firestore.collection('rewards').get();
-    return rewardsSnapshot.docs.map((doc) => doc.data()).toList();
+    return rewardsSnapshot.docs.map((doc) {
+      final data = doc.data();
+      data['id'] = doc.id; // Include document ID
+      return data;
+    }).toList();
   }
 
   void _showRewardDetails(Map<String, dynamic> reward) {
@@ -38,14 +42,15 @@ class _RewardsListState extends State<RewardsList> {
               ),
             ),
             const SizedBox(height: 16),
-            Text(reward['name'],
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            Text(
+              reward['name'],
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
             const SizedBox(height: 5),
             Text(reward['description']),
             const SizedBox(height: 16),
             Text(
-              "Merchant: ${reward['merchant']}",
+              "${reward['merchant']}",
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ],
@@ -69,7 +74,7 @@ class _RewardsListState extends State<RewardsList> {
     try {
       final rewardDoc = _firestore
           .collection('rewards')
-          .doc(reward['name']); // Use a unique ID
+          .doc(reward['id']); // Use the correct document ID
       await rewardDoc.update({'claimed': true});
       Navigator.of(context).pop(); // Close the dialog
       showCupertinoDialog(
@@ -121,12 +126,16 @@ class _RewardsListState extends State<RewardsList> {
           clipBehavior: Clip.none,
           child: Row(
             children: rewards.map((reward) {
-              return GestureDetector(
-                onTap: () => _showRewardDetails(reward),
-                child: RewardCard(
-                  title: reward['name'],
-                  subtitle: reward['merchant'],
-                  imageUrl: reward['imageUrl'],
+              return Padding(
+                padding: const EdgeInsets.only(right: 12.0),
+                child: GestureDetector(
+                  onTap: () => _showRewardDetails(reward),
+                  child: RewardCard(
+                    title: reward['name'],
+                    subtitle: reward['merchant'],
+                    imageUrl: reward['imageUrl'],
+                    claimed: reward['claimed'], // Pass the claimed status
+                  ),
                 ),
               );
             }).toList(),
@@ -141,61 +150,94 @@ class RewardCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final String imageUrl;
+  final bool claimed;
 
   const RewardCard({
     Key? key,
     required this.title,
     required this.subtitle,
     required this.imageUrl,
+    required this.claimed,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 200,
-      height: 170,
-      decoration: BoxDecoration(
-        color: CupertinoColors.white,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: CupertinoColors.systemGrey5),
-        boxShadow: const [
-          BoxShadow(
-            color: CupertinoColors.systemGrey5,
-            blurRadius: 6,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            child: Image.network(
-              imageUrl,
-              width: double.infinity,
-              height: 100,
-              fit: BoxFit.cover,
+    return Stack(
+      children: [
+        Opacity(
+          opacity: claimed ? 0.5 : 1.0, // Reduce opacity for claimed rewards
+          child: Container(
+            width: 200,
+            height: 170,
+            decoration: BoxDecoration(
+              color: CupertinoColors.white,
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(color: CupertinoColors.systemGrey5),
+              boxShadow: const [
+                BoxShadow(
+                  color: CupertinoColors.systemGrey5,
+                  blurRadius: 6,
+                  offset: Offset(0, 2),
+                ),
+              ],
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(15),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w800,
-                      color: CupertinoColors.black),
+                ClipRRect(
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(12)),
+                  child: Image.network(
+                    imageUrl,
+                    width: double.infinity,
+                    height: 100,
+                    fit: BoxFit.cover,
+                  ),
                 ),
-                Text(subtitle,
-                    style: const TextStyle(color: CupertinoColors.systemGrey)),
+                Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            color: CupertinoColors.black),
+                      ),
+                      Text(
+                        subtitle,
+                        style:
+                            const TextStyle(color: CupertinoColors.systemGrey),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
-        ],
-      ),
+        ),
+        if (claimed)
+          Positioned(
+            top: 10,
+            right: 10,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: CupertinoColors.systemRed,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Text(
+                "REDEEMED",
+                style: TextStyle(
+                  color: CupertinoColors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
