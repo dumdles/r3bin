@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'rewards_list.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
@@ -179,86 +181,6 @@ class SectionHeader extends StatelessWidget {
         const Text('View all',
             style: TextStyle(color: CupertinoColors.activeGreen)),
       ],
-    );
-  }
-}
-
-class RewardsList extends StatelessWidget {
-  const RewardsList({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      clipBehavior: Clip.none,
-      child: Row(
-        children: [
-          RewardCard(title: '20% off Chye Sim', subtitle: 'NTUC FairPrice'),
-          SizedBox(width: 12),
-          RewardCard(title: '\$3 Voucher', subtitle: 'Koufu'),
-          SizedBox(width: 12),
-          RewardCard(title: '\$3 Voucher', subtitle: 'Koufu'),
-          SizedBox(width: 12),
-          RewardCard(title: '\$3 off any Drink', subtitle: 'Chagee'),
-        ],
-      ),
-    );
-  }
-}
-
-class RewardCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  const RewardCard({Key? key, required this.title, required this.subtitle})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 200,
-      height: 170,
-      decoration: BoxDecoration(
-        color: CupertinoColors.white,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: CupertinoColors.systemGrey5),
-        boxShadow: const [
-          BoxShadow(
-            color: CupertinoColors.systemGrey5,
-            blurRadius: 6,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            child: Image.network(
-              'https://picsum.photos/200/80', // Placeholder image
-              width: double.infinity,
-              height: 100,
-              fit: BoxFit.cover,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(15),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w800,
-                      color: CupertinoColors.black),
-                ),
-                Text(subtitle,
-                    style: const TextStyle(color: CupertinoColors.systemGrey)),
-              ],
-            ),
-          )
-        ],
-      ),
     );
   }
 }
